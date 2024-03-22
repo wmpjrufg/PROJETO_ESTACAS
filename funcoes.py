@@ -37,32 +37,35 @@ def estaca_info():
 
 
 def capacidade_carga(df, diametro_estaca, tipo_estaca):
-    if diametro_estaca is not None and tipo_estaca is not None:
-        st.title("Capacidade de Carga")
-        df['tipo estaca'] = tipo_estaca
-        df['diâmetro (m)'] = diametro_estaca
-        df['area estaca (m2)'] = df.apply(area_estaca, axis=1)
-        df['perimetro estaca (m)'] = df.apply(perimetro_estaca, axis=1)
-        df['k'] = df.apply(k_solo, axis=1, args=(k_alpha,))
-        df['alpha'] = df.apply(alpha_solo, axis=1, args=(k_alpha,))
-        df['f_1'] = df.apply(f1, axis=1, args=(f_1,))
-        df['f_2'] = 2 * df['f_1']
-        df['r_p (kPa)'] = df.apply(tensao_ponta, axis=1)
-        df['P_p (kN)'] = df.apply(carga_ponta, axis=1)
-        df['r_l (kPa)'] = df.apply(tensao_lateral, axis=1)
-        df['P_l (kN)'] = df.apply(carga_lateral, axis=1)
-        soma_resultados = []
-        r_l = df['r_l (kPa)'].to_list()
-        for i in range(len(df)):
-            if i == 0:
-                soma = df.iloc[i]['r_p (kPa)'] + df.iloc[i]['r_l (kPa)']
-            else:
-                soma = df.iloc[i]['r_p (kPa)'] + sum(r_l[:i+1])
-            soma_resultados.append(soma)
-        df['r_rd [Aoki-Veloso] (kPa)'] = soma_resultados
-        df['P_rd [Aoki-Veloso] (kN)'] = df.apply(carga_total, axis=1)
-        st.write(df)
-        return df
+    try: 
+        if diametro_estaca is not None and tipo_estaca is not None:
+            st.title("Capacidade de Carga")
+            df['tipo estaca'] = tipo_estaca
+            df['diâmetro (m)'] = diametro_estaca
+            df['area estaca (m2)'] = df.apply(area_estaca, axis=1)
+            df['perimetro estaca (m)'] = df.apply(perimetro_estaca, axis=1)
+            df['k'] = df.apply(k_solo, axis=1, args=(k_alpha,))
+            df['alpha'] = df.apply(alpha_solo, axis=1, args=(k_alpha,))
+            df['f_1'] = df.apply(f1, axis=1, args=(f_1,))
+            df['f_2'] = 2 * df['f_1']
+            df['r_p (kPa)'] = df.apply(tensao_ponta, axis=1)
+            df['P_p (kN)'] = df.apply(carga_ponta, axis=1)
+            df['r_l (kPa)'] = df.apply(tensao_lateral, axis=1)
+            df['P_l (kN)'] = df.apply(carga_lateral, axis=1)
+            soma_resultados = []
+            r_l = df['r_l (kPa)'].to_list()
+            for i in range(len(df)):
+                if i == 0:
+                    soma = df.iloc[i]['r_p (kPa)'] + df.iloc[i]['r_l (kPa)']
+                else:
+                    soma = df.iloc[i]['r_p (kPa)'] + sum(r_l[:i+1])
+                soma_resultados.append(soma)
+            df['r_rd [Aoki-Veloso] (kPa)'] = soma_resultados
+            df['P_rd [Aoki-Veloso] (kN)'] = df.apply(carga_total, axis=1)
+            st.write(df)
+            return df
+    except Exception as e:
+        st.error(f"Ocorreu um erro ao gerar a tabela: {str(e)}")
 
 
 def download_excel(df, nome_df):
