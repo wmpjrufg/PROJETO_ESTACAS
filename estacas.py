@@ -1,14 +1,5 @@
 import numpy as np
 
-
-
-c = {'argila': 120,
-    'silte argiloso': 200,
-           'silte arenoso': 250,
-           'areia': 400
-          }
-
-
 def area_estaca(linha):
     """
     Calcula a área da seção transversal da estaca
@@ -73,7 +64,7 @@ def k_solo(linha):
                             }
 
     # Determinando o coeficiente k do solo    
-    solo = linha['Solo Aoki-Veloso']
+    solo = linha['Solo Aoki-Veloso'].lower()
     for chave, valor in coeficiente_k_e_alpha.items():
         if solo == chave:
             k = valor[0]
@@ -82,8 +73,13 @@ def k_solo(linha):
     return k
 
 
-def c_solo(linha, coeficiente_c):
-    solo = linha['Solo Decourt-Quaresma']
+def c_solo(linha):
+    coeficiente_c = {'argila': 120,
+                        'silte argiloso': 200,
+                        'silte arenoso': 250,
+                        'areia': 400
+                    }
+    solo = linha['Solo Decourt-Quaresma'].lower()
     for chave, valor in coeficiente_c.items():
         if solo == chave:
             c = valor
@@ -121,7 +117,7 @@ def alpha_solo(linha):
                             }
 
     # Determinando o coeficiente alpha do solo
-    solo = linha['Solo Aoki-Veloso']
+    solo = linha['Solo Aoki-Veloso'].lower()
     for chave, valor in coeficiente_k_e_alpha.items():
         if solo == chave:
             alpha = valor[1]
@@ -154,7 +150,7 @@ def f1(linha):
     return f_1
 
 
-def tensao_ponta(linha):
+def tensao_ponta_aoki_veloso(linha):
     """
     Calcula a tensão resistente na ponta da estaca em kPa
 
@@ -168,7 +164,21 @@ def tensao_ponta(linha):
     return linha['NSPT'] * linha['k'] / linha['f_1'] * 1000
 
 
-def carga_ponta(linha):
+def tensao_ponta_decorto_quaresma(linha):
+    """
+    Calcula a tensão resistente na ponta da estaca em kPa
+
+    Args:
+        linha (pd.Series): linha do DataFrame
+    
+    Returns:
+        tensao_ponta (float): tensão resistente na ponta da estaca em kPa
+    """
+
+    return linha['NSPT'] * linha['c']
+
+
+def carga_ponta_aoki_veloso(linha):
     """
     Calcula a carga resistente na ponta da estaca em kN
 
@@ -179,10 +189,24 @@ def carga_ponta(linha):
         carga_ponta (float): carga resistente na ponta da estaca em kN
     """
 
-    return linha['r_p (kPa)'] * linha['area estaca (m2)']
+    return linha['r_p [Aoki-Veloso] (kPa)'] * linha['area estaca (m2)']
 
 
-def tensao_lateral(linha):
+def carga_ponta_decourt_quaresma(linha):
+    """
+    Calcula a carga resistente na ponta da estaca em kN
+
+    Args:
+        linha (pd.Series): linha do DataFrame
+    
+    Returns:
+        carga_ponta (float): carga resistente na ponta da estaca em kN
+    """
+
+    return linha['r_p [Decourt-Quaresma] (kPa)'] * linha['area estaca (m2)']
+
+
+def tensao_lateral_aoki_veloso(linha):
     """
     Calcula a tensão resistente lateral da estaca em kPa sem acumulação de tensões
 
@@ -198,8 +222,24 @@ def tensao_lateral(linha):
 
     return tal_lk * 1000
 
+def tensao_lateral_decourt_quaresma(linha):
+    """
+    Calcula a tensão resistente lateral da estaca em kPa sem acumulação de tensões
 
-def carga_lateral(linha):
+    Args:
+        linha (pd.Series): linha do DataFrame
+    
+    Returns:
+        tensao_lateral (float): tensão resistente lateral da estaca em kPa
+    """
+
+    # Tensão resistente lateral da estaca por comprimento de estaca
+    tal_lk = (linha['nspt_medio']) / 3 + 1
+
+    return tal_lk * 10
+
+
+def carga_lateral_aoki_veloso(linha):
     """
     Calcula a carga resistente lateral da estaca em kN
 
@@ -210,4 +250,18 @@ def carga_lateral(linha):
         carga_lateral (float): carga resistente lateral da estaca em kN
     """
 
-    return linha['r_l acumulado (kPa)'] * (linha['perimetro estaca (m)'] * 1)
+    return linha['r_l acumulado [Aoki-Veloso] (kPa)'] * (linha['perimetro estaca (m)'] * 1)
+
+
+def carga_lateral_decourt_quaresma(linha):
+    """
+    Calcula a carga resistente lateral da estaca em kN
+
+    Args:
+        linha (pd.Series): linha do DataFrame
+    
+    Returns:
+        carga_lateral (float): carga resistente lateral da estaca em kN
+    """
+
+    return linha['r_l acumulado [Decourt-Quaresma] (kPa)'] * (linha['perimetro estaca (m)'] * linha['profundidade (m)'])
