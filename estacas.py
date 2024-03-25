@@ -222,6 +222,7 @@ def tensao_lateral_aoki_veloso(linha):
 
     return tal_lk * 1000
 
+
 def tensao_lateral_decourt_quaresma(linha):
     """
     Calcula a tensão resistente lateral da estaca em kPa sem acumulação de tensões
